@@ -98,3 +98,32 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+## Типы данных и интерфейсы
+
+- `IProduct` – описание товара
+- `IBuyer` – данные покупателя
+- `TPayment` – `'card' | 'cash'`
+- `IOrder` – структура заказа для отправки на сервер
+- `IProductsResponse` – ответ сервера со списком товаров
+- `IOrderResponse` – ответ сервера после заказа
+
+## Модели данных
+
+### ProductModel
+Хранит каталог товаров и выбранный товар.  
+Методы: `setItems`, `getItems`, `getProductById`, `setSelectedProduct`, `getSelectedProduct`.
+
+### CartModel
+Хранит товары в корзине.  
+Методы: `getItems`, `addItem`, `removeItem`, `clear`, `getTotal`, `getCount`, `hasItem`.
+
+### BuyerModel
+Хранит данные покупателя и выполняет валидацию.  
+Методы: `setData`, `getData`, `clear`, `validate`, `isValid`.
+
+## Слой коммуникации
+
+### LarekApi
+Взаимодействует с сервером через `Api`.  
+- `getProducts()` – GET /product  
+- `postOrder(order)` – POST /order
