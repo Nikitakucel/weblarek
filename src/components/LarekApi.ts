@@ -1,13 +1,8 @@
-import { Api } from './base/Api';
+import { IApi } from '../types';
 import { IOrder, IOrderResponse, IProductsResponse } from '../types';
-import { API_URL } from '../utils/constants';
 
 export class LarekApi {
-  private api: Api;
-
-  constructor() {
-    this.api = new Api(API_URL);
-  }
+  constructor(private api: IApi) {}
 
   getProducts(): Promise<IProductsResponse> {
     return this.api.get('/product');

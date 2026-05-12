@@ -1,10 +1,8 @@
-import { IBuyer } from '../../types';
-
-export type BuyerValidationErrors = Partial<Record<keyof IBuyer, string>>;
+import { IBuyer, BuyerValidationErrors } from '../../types';
 
 export class BuyerModel {
   private data: IBuyer = {
-    payment: 'card',
+    payment: null,
     email: '',
     phone: '',
     address: '',
@@ -20,7 +18,7 @@ export class BuyerModel {
 
   clear(): void {
     this.data = {
-      payment: 'card',
+      payment: null,
       email: '',
       phone: '',
       address: '',
@@ -34,9 +32,5 @@ export class BuyerModel {
     if (!this.data.email.trim()) errors.email = 'Укажите email';
     if (!this.data.phone.trim()) errors.phone = 'Укажите телефон';
     return errors;
-  }
-
-  isValid(): boolean {
-    return Object.keys(this.validate()).length === 0;
   }
 }

@@ -40,6 +40,7 @@ npm run build
 ```
 yarn build
 ```
+
 # Интернет-магазин «Web-Larёk»
 «Web-Larёk» — это интернет-магазин с товарами для веб-разработчиков, где пользователи могут просматривать товары, добавлять их в корзину и оформлять заказы. Сайт предоставляет удобный интерфейс с модальными окнами для просмотра деталей товаров, управления корзиной и выбора способа оплаты, обеспечивая полный цикл покупки с отправкой заказов на сервер.
 
@@ -68,7 +69,6 @@ Presenter - презентер содержит основную логику п
 Методы класса:  
 `render(data?: Partial<T>): HTMLElement` - Главный метод класса. Он принимает данные, которые необходимо отобразить в интерфейсе, записывает эти данные в поля класса и возвращает ссылку на DOM-элемент. Предполагается, что в классах, которые будут наследоваться от `Component` будут реализованы сеттеры для полей с данными, которые будут вызываться в момент вызова `render` и записывать данные в необходимые DOM элементы.  
 `setImage(element: HTMLImageElement, src: string, alt?: string): void` - утилитарный метод для модификации DOM-элементов `<img>`
-
 
 #### Класс Api
 Содержит в себе базовую логику отправки запросов.
@@ -100,30 +100,67 @@ Presenter - презентер содержит основную логику п
 
 ## Типы данных и интерфейсы
 
-- `IProduct` – описание товара
-- `IBuyer` – данные покупателя
+- `IProduct` – описание товара (id, description, image, title, category, price)
+- `IBuyer` – данные покупателя (payment, email, phone, address), где `payment` может быть `'card' | 'cash' | null` (null означает, что способ не выбран)
 - `TPayment` – `'card' | 'cash'`
-- `IOrder` – структура заказа для отправки на сервер
-- `IProductsResponse` – ответ сервера со списком товаров
-- `IOrderResponse` – ответ сервера после заказа
+- `IOrder extends IBuyer` – заказ для отправки (добавляет `items: string[]` и `total: number`)
+- `IProductsResponse` – ответ сервера со списком товаров (`items: IProduct[]`, `total: number`)
+- `IOrderResponse` – ответ сервера после заказа (`id: string`, `total: number`)
+- `BuyerValidationErrors` – тип для ошибок валидации (Partial<Record<keyof IBuyer, string>>)
 
 ## Модели данных
 
 ### ProductModel
-Хранит каталог товаров и выбранный товар.  
-Методы: `setItems`, `getItems`, `getProductById`, `setSelectedProduct`, `getSelectedProduct`.
+Отвечает за хранение каталога товаров и выбранного товара.
+
+**Поля:**
+- `private items: IProduct[]` – массив всех товаров.
+- `private selectedProduct: IProduct | null` – выбранный товар (для модального окна).
+
+**Методы:**
+- `setItems(products: IProduct[]): void` – заменяет массив товаров новым.
+- `getItems(): IProduct[]` – возвращает массив всех товаров.
+- `getProductById(id: string): IProduct | undefined` – ищет товар по id.
+- `setSelectedProduct(product: IProduct | null): void` – сохраняет выбранный товар.
+- `getSelectedProduct(): IProduct | null` – возвращает выбранный товар.
 
 ### CartModel
-Хранит товары в корзине.  
-Методы: `getItems`, `addItem`, `removeItem`, `clear`, `getTotal`, `getCount`, `hasItem`.
+Отвечает за хранение товаров, добавленных в корзину.
+
+**Поля:**
+- `private items: IProduct[]` – массив товаров в корзине.
+
+**Методы:**
+- `getItems(): IProduct[]` – возвращает массив товаров в корзине.
+- `addItem(product: IProduct): void` – добавляет товар, если его ещё нет в корзине (использует `hasItem`).
+- `removeItem(productId: string): void` – удаляет товар по id.
+- `clear(): void` – очищает корзину.
+- `getTotal(): number` – возвращает общую стоимость (цена null заменяется 0).
+- `getCount(): number` – возвращает количество товаров.
+- `hasItem(productId: string): boolean` – проверяет наличие товара по id.
 
 ### BuyerModel
-Хранит данные покупателя и выполняет валидацию.  
-Методы: `setData`, `getData`, `clear`, `validate`, `isValid`.
+Отвечает за хранение данных покупателя и их валидацию.
+
+**Поля:**
+- `private data: IBuyer` – объект с полями payment, email, phone, address.
+
+**Методы:**
+- `setData(partial: Partial<IBuyer>): void` – обновляет только переданные поля, остальные сохраняет прежними.
+- `getData(): IBuyer` – возвращает копию всех данных.
+- `clear(): void` – сбрасывает все поля (payment → null, строковые поля → '').
+- `validate(): BuyerValidationErrors` – проверяет заполненность полей и возвращает объект с ошибками. Ключи – имена полей, значения – текст ошибки. Поле `payment` валидно, если не `null`; остальные – если строка не пуста.
 
 ## Слой коммуникации
 
 ### LarekApi
-Взаимодействует с сервером через `Api`.  
-- `getProducts()` – GET /product  
-- `postOrder(order)` – POST /order
+Отвечает за взаимодействие с сервером. Использует композицию с интерфейсом `IApi` (инъекция зависимости).
+
+**Конструктор:**
+- `constructor(api: IApi)` – принимает экземпляр, реализующий методы `get` и `post`.
+
+**Методы:**
+- `getProducts(): Promise<IProductsResponse>` – выполняет GET-запрос на `/product`, возвращает объект с массивом товаров.
+- `postOrder(order: IOrder): Promise<IOrderResponse>` – выполняет POST-запрос на `/order`, передаёт данные заказа, возвращает ответ сервера.
+
+> Примечание: `LarekApi` не создаёт экземпляр `Api` самостоятельно, а получает его извне. Это соответствует принципу инверсии зависимостей и позволяет легко тестировать и заменять слой коммуникации.

@@ -8,7 +8,7 @@ export class CartModel {
   }
 
   addItem(product: IProduct): void {
-    if (!this.items.some(item => item.id === product.id)) {
+    if (!this.hasItem(product.id)) {
       this.items.push(product);
     }
   }
