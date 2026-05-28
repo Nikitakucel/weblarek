@@ -167,6 +167,6 @@ events.on('success:close', () => {
 });
 
 // Загрузка каталога
-larekApi.getProducts()
+console.log('API_URL:', API_URL); larekApi.getProducts()
   .then(response => productModel.setItems(response.items))
   .catch(err => console.error('Ошибка загрузки каталога:', err));
