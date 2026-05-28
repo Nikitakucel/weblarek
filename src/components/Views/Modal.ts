@@ -1,7 +1,7 @@
 import { Component } from '../base/Component';
 import { ensureElement } from '../../utils/utils';
 
-export interface ModalData {
+interface ModalData {
   content: HTMLElement | DocumentFragment;
 }
 
@@ -9,14 +9,19 @@ export class Modal extends Component<ModalData> {
   private closeButton: HTMLButtonElement;
   private contentElement: HTMLElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, onClose?: () => void) {
     super(container);
-    this.closeButton = ensureElement('.modal__close', this.container) as HTMLButtonElement;
-    this.contentElement = ensureElement('.modal__content', this.container);
+    this.closeButton = ensureElement('.modal__close', container) as HTMLButtonElement;
+    this.contentElement = ensureElement('.modal__content', container);
 
-    this.closeButton.addEventListener('click', () => this.close());
-    this.container.addEventListener('click', (e) => {
-      if (e.target === this.container) this.close();
+    const close = () => {
+      this.close();
+      onClose?.();
+    };
+
+    this.closeButton.addEventListener('click', close);
+    container.addEventListener('click', (e) => {
+      if (e.target === container) close();
     });
   }
 

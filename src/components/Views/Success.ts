@@ -1,19 +1,18 @@
 import { Component } from '../base/Component';
 import { ensureElement } from '../../utils/utils';
-import { EventEmitter } from '../base/Events';
 
-export interface SuccessData {
+interface SuccessData {
   total: number;
 }
 
 export class Success extends Component<SuccessData> {
   private totalElement: HTMLElement;
 
-  constructor(container: HTMLElement, events: EventEmitter) {
+  constructor(container: HTMLElement, onClose?: () => void) {
     super(container);
-    this.totalElement = ensureElement('.order-success__description', this.container);
-    const closeButton = ensureElement('.order-success__close', this.container);
-    closeButton.addEventListener('click', () => events.emit('success:close'));
+    this.totalElement = ensureElement('.order-success__description', container);
+    const closeButton = ensureElement('.order-success__close', container);
+    closeButton.addEventListener('click', () => onClose?.());
   }
 
   set total(value: number) {

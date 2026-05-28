@@ -9,7 +9,7 @@ export class ProductModel {
 
   setItems(products: IProduct[]): void {
     this.items = products;
-    this.events.emit('catalog:changed', this.items);
+    this.events.emit('catalog:changed');
   }
 
   getItems(): IProduct[] {
@@ -17,12 +17,12 @@ export class ProductModel {
   }
 
   getProductById(id: string): IProduct | undefined {
-    return this.items.find(p => p.id === id);
+    return this.items.find(product => product.id === id);
   }
 
   setSelectedProduct(product: IProduct): void {
     this.selectedProduct = product;
-    this.events.emit('product:selected', product);
+    this.events.emit('product:selected');
   }
 
   getSelectedProduct(): IProduct | null {

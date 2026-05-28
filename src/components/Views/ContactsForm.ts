@@ -1,8 +1,7 @@
 import { Form } from './Form';
 import { ensureElement } from '../../utils/utils';
-import { EventEmitter } from '../base/Events';
 
-export interface ContactsData {
+interface ContactsData {
   email: string;
   phone: string;
 }
@@ -11,29 +10,22 @@ export class ContactsForm extends Form<ContactsData> {
   private emailInput: HTMLInputElement;
   private phoneInput: HTMLInputElement;
 
-  constructor(container: HTMLFormElement, events: EventEmitter) {
-    super(container);
-    this.emailInput = ensureElement('input[name="email"]', this.container) as HTMLInputElement;
-    this.phoneInput = ensureElement('input[name="phone"]', this.container) as HTMLInputElement;
+  constructor(
+    container: HTMLFormElement,
+    onEmailChange?: (data: { email: string }) => void,
+    onPhoneChange?: (data: { phone: string }) => void,
+    onSubmit?: () => void
+  ) {
+    super(container, onSubmit);
+    this.emailInput = ensureElement('input[name="email"]', container) as HTMLInputElement;
+    this.phoneInput = ensureElement('input[name="phone"]', container) as HTMLInputElement;
 
-    this.emailInput.addEventListener('input', () => this.emitChanges(events));
-    this.phoneInput.addEventListener('input', () => this.emitChanges(events));
-
-    this.container.addEventListener('submit', (e) => {
-      e.preventDefault();
-      events.emit('contacts:submit');
+    this.emailInput.addEventListener('input', (e) => {
+      onEmailChange?.({ email: (e.target as HTMLInputElement).value });
     });
-  }
-
-  getInputData(): ContactsData {
-    return {
-      email: this.emailInput.value,
-      phone: this.phoneInput.value,
-    };
-  }
-
-  private emitChanges(events: EventEmitter) {
-    events.emit('contacts:change', this.getInputData());
+    this.phoneInput.addEventListener('input', (e) => {
+      onPhoneChange?.({ phone: (e.target as HTMLInputElement).value });
+    });
   }
 
   set email(value: string) {

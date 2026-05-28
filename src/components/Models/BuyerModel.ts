@@ -13,7 +13,7 @@ export class BuyerModel {
 
   setData(partial: Partial<IBuyer>): void {
     this.data = { ...this.data, ...partial };
-    this.events.emit('buyer:changed', this.data);
+    this.events.emit('buyer:changed');
   }
 
   getData(): IBuyer {
@@ -27,7 +27,7 @@ export class BuyerModel {
       phone: '',
       address: '',
     };
-    this.events.emit('buyer:changed', this.data);
+    this.events.emit('buyer:changed');
   }
 
   validate(): BuyerValidationErrors {

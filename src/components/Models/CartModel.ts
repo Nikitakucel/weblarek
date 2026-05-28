@@ -13,18 +13,18 @@ export class CartModel {
   addItem(product: IProduct): void {
     if (!this.hasItem(product.id)) {
       this.items.push(product);
-      this.events.emit('cart:changed', this.items);
+      this.events.emit('cart:changed');
     }
   }
 
   removeItem(productId: string): void {
     this.items = this.items.filter(item => item.id !== productId);
-    this.events.emit('cart:changed', this.items);
+    this.events.emit('cart:changed');
   }
 
   clear(): void {
     this.items = [];
-    this.events.emit('cart:changed', this.items);
+    this.events.emit('cart:changed');
   }
 
   getTotal(): number {

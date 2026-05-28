@@ -1,28 +1,26 @@
 import { Card } from './Card';
-import { IProduct } from '../../types';
-import { EventEmitter } from '../base/Events';
+import { ensureElement } from '../../utils/utils';
 
-export interface CardBasketData {
-  data: IProduct;
+interface CardBasketData {
+  title: string;
+  price: number | null;
   index: number;
 }
 
 export class CardBasket extends Card<CardBasketData> {
   private indexElement: HTMLElement;
+  private deleteButton: HTMLButtonElement;
 
-  constructor(container: HTMLElement, events: EventEmitter, product: IProduct) {
+  constructor(container: HTMLElement, onDelete?: () => void) {
     super(container);
-    this.indexElement = container.querySelector('.basket__item-index')!;
-    const deleteBtn = container.querySelector('.basket__item-delete')!;
-    deleteBtn.addEventListener('click', () => events.emit('basket:remove', product));
+    this.indexElement = ensureElement('.basket__item-index', container);
+    this.deleteButton = ensureElement('.basket__item-delete', container) as HTMLButtonElement;
+    if (onDelete) {
+      this.deleteButton.addEventListener('click', onDelete);
+    }
   }
 
   set index(value: number) {
     this.indexElement.textContent = String(value + 1);
-  }
-
-  set data(product: IProduct) {
-    this.title = product.title;
-    this.price = product.price;
   }
 }
