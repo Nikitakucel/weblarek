@@ -1,5 +1,5 @@
 import { Component } from '../base/Component';
-import { categoryMap } from '../../utils/constants';
+import { categoryMap, CDN_URL } from '../../utils/constants';
 import { ensureElement } from '../../utils/utils';
 
 export abstract class Card<T = {}> extends Component<T> {
@@ -32,6 +32,8 @@ export abstract class Card<T = {}> extends Component<T> {
   }
 
   set image(src: string) {
-    if (this.imageElement) this.imageElement.src = src;
+    if (this.imageElement) {
+      this.imageElement.src = `${CDN_URL}/${src}`;
+    }
   }
 }

@@ -16,6 +16,7 @@ import { OrderForm } from './components/Views/OrderForm';
 import { ContactsForm } from './components/Views/ContactsForm';
 import { Success } from './components/Views/Success';
 import { IProduct } from './types';
+import { cloneTemplate } from './utils/utils';   // <-- добавили
 
 const events = new EventEmitter();
 const api = new Api(API_URL);
@@ -36,8 +37,9 @@ let currentContactsForm: ContactsForm | null = null;
 
 events.on('catalog:changed', (products: IProduct[]) => {
   const cards = products.map(p => {
-    const template = document.querySelector('#card-catalog') as HTMLTemplateElement;
-    const card = new CardCatalog(template.content.cloneNode(true) as HTMLElement, events);
+    // используем cloneTemplate – он возвращает HTMLElement
+    const container = cloneTemplate<HTMLElement>('#card-catalog');
+    const card = new CardCatalog(container, events);
     return card.render({ data: p });
   });
   page.catalog = cards;
@@ -45,8 +47,8 @@ events.on('catalog:changed', (products: IProduct[]) => {
 
 events.on('card:select', (product: IProduct) => {
   productModel.setSelectedProduct(product);
-  const template = document.querySelector('#card-preview') as HTMLTemplateElement;
-  const preview = new CardPreview(template.content.cloneNode(true) as HTMLElement, events);
+  const container = cloneTemplate<HTMLElement>('#card-preview');
+  const preview = new CardPreview(container, events);
   modal.content = preview.render({
     data: product,
     inBasket: cartModel.hasItem(product.id)
@@ -67,8 +69,8 @@ events.on('cart:changed', () => {
   page.cartCount = cartModel.getCount();
   if (currentBasket) {
     const items = cartModel.getItems().map((item, index) => {
-      const tpl = document.querySelector('#card-basket') as HTMLTemplateElement;
-      const card = new CardBasket(tpl.content.cloneNode(true) as HTMLElement, events, item);
+      const container = cloneTemplate<HTMLElement>('#card-basket');
+      const card = new CardBasket(container, events, item);
       return card.render({ data: item, index });
     });
     currentBasket.items = items;
@@ -77,13 +79,13 @@ events.on('cart:changed', () => {
 });
 
 events.on('basket:open', () => {
-  const template = document.querySelector('#basket') as HTMLTemplateElement;
-  const basket = new Basket(template.content.cloneNode(true) as HTMLElement, events);
+  const container = cloneTemplate<HTMLElement>('#basket');
+  const basket = new Basket(container, events);
   currentBasket = basket;
 
   const items = cartModel.getItems().map((item, index) => {
-    const tpl = document.querySelector('#card-basket') as HTMLTemplateElement;
-    const card = new CardBasket(tpl.content.cloneNode(true) as HTMLElement, events, item);
+    const cardContainer = cloneTemplate<HTMLElement>('#card-basket');
+    const card = new CardBasket(cardContainer, events, item);
     return card.render({ data: item, index });
   });
   basket.items = items;
@@ -98,8 +100,8 @@ events.on('basket:remove', (product: IProduct) => {
 
 events.on('order:start', () => {
   buyerModel.clear();
-  const template = document.querySelector('#order') as HTMLTemplateElement;
-  const orderForm = new OrderForm(template.content.cloneNode(true) as HTMLFormElement, events);
+  const container = cloneTemplate<HTMLFormElement>('#order');
+  const orderForm = new OrderForm(container, events);
   currentOrderForm = orderForm;
   modal.content = orderForm.render();
   orderForm.valid = false;
@@ -119,8 +121,8 @@ events.on('order:change', (data: { payment: string; address: string }) => {
 events.on('order:submit', () => {
   const errors = buyerModel.validate();
   if (!errors.payment && !errors.address) {
-    const template = document.querySelector('#contacts') as HTMLTemplateElement;
-    const contactsForm = new ContactsForm(template.content.cloneNode(true) as HTMLFormElement, events);
+    const container = cloneTemplate<HTMLFormElement>('#contacts');
+    const contactsForm = new ContactsForm(container, events);
     currentContactsForm = contactsForm;
     const data = buyerModel.getData();
     modal.content = contactsForm.render({ email: data.email, phone: data.phone });
@@ -150,8 +152,8 @@ events.on('contacts:submit', () => {
     };
     larekApi.postOrder(order)
       .then(response => {
-        const template = document.querySelector('#success') as HTMLTemplateElement;
-        const success = new Success(template.content.cloneNode(true) as HTMLElement, events);
+        const container = cloneTemplate<HTMLElement>('#success');
+        const success = new Success(container, events);
         modal.content = success.render({ total: response.total });
         cartModel.clear();
         buyerModel.clear();
@@ -167,6 +169,6 @@ events.on('success:close', () => {
 });
 
 // Загрузка каталога
-console.log('API_URL:', API_URL); larekApi.getProducts()
+larekApi.getProducts()
   .then(response => productModel.setItems(response.items))
   .catch(err => console.error('Ошибка загрузки каталога:', err));

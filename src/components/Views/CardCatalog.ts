@@ -12,7 +12,9 @@ export class CardCatalog extends Card<CardCatalogData> {
   constructor(container: HTMLElement, events: EventEmitter) {
     super(container);
     container.addEventListener('click', () => {
-      if (this.product) events.emit('card:select', this.product);
+      if (this.product) {
+        events.emit('card:select', this.product);
+      }
     });
   }
 
