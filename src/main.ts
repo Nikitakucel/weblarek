@@ -16,7 +16,7 @@ import { OrderForm } from './components/Views/OrderForm';
 import { ContactsForm } from './components/Views/ContactsForm';
 import { Success } from './components/Views/Success';
 import { IProduct } from './types';
-import { cloneTemplate } from './utils/utils';   // <-- добавили
+import { cloneTemplate } from './utils/utils';
 
 const events = new EventEmitter();
 const api = new Api(API_URL);
