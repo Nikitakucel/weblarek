@@ -1,4 +1,5 @@
 import { IBuyer, BuyerValidationErrors } from '../../types';
+import { EventEmitter } from '../base/Events';
 
 export class BuyerModel {
   private data: IBuyer = {
@@ -8,8 +9,11 @@ export class BuyerModel {
     address: '',
   };
 
+  constructor(private events: EventEmitter) {}
+
   setData(partial: Partial<IBuyer>): void {
     this.data = { ...this.data, ...partial };
+    this.events.emit('buyer:changed', this.data);
   }
 
   getData(): IBuyer {
@@ -23,6 +27,7 @@ export class BuyerModel {
       phone: '',
       address: '',
     };
+    this.events.emit('buyer:changed', this.data);
   }
 
   validate(): BuyerValidationErrors {
